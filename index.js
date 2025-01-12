@@ -57,7 +57,7 @@ app.use(bodyParser.json());
 
 const db = new pg.Client({
     user: "postgres",
-    host: "localhost",
+    host: process.env.DATABASE_URL,
     database: "optho",
     password: process.env.DATABASE_URL,
     port: 5432
