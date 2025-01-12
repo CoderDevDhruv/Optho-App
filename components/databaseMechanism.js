@@ -1,5 +1,6 @@
 import pg from 'pg';
-require('dotenv').config();
+import dotenv from 'dotenv';
+
 
 const db = new pg.Client({
     user: "postgres",
