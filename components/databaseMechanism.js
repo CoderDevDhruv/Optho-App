@@ -4,7 +4,7 @@ const db = new pg.Client({
     user: "postgres",
     host: "localhost",
     database: "optho",
-    password: "123456",
+    password: "process.env.PG_PASSWORD",
     port: 5432
 });
 
