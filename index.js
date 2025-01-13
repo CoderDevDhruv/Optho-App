@@ -55,15 +55,12 @@ app.use(express.static(path.join(__dirname, 'uploads'))); // Serve uploaded file
 app.use(express.json());
 app.use(bodyParser.json());
 
-const db = new pg.Client({
-    user: "postgres",
-    host: process.env.DATABASE_URL,
-    database: "optho",
-    password: process.env.DATABASE_URL,
-    port: 5432
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false, // Required for Render SSL connections
+  },
 });
-
-db.connect();
 initializeClient();
 
 let name;
