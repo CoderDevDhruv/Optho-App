@@ -2,14 +2,12 @@ import pg from 'pg';
 import dotenv from 'dotenv';
 
 
-const db = new pg.Client({
-    user: "postgres",
-    host: process.env.DATABASE_URL,
-    database: "optho",
-    password: process.env.DATABASE_URL,
-    port: 5432
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false, // Required for Render SSL connections
+  },
 });
-
 db.connect();
 
 export function createLog(reg, dtype, ddur, insulin, oha, HBA1c, treatment, bcvar, bcval, iopr, iopl, ddr, drl ,mer, mel, octr, octl, advice, fllwp){
