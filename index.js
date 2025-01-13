@@ -37,7 +37,7 @@ in index.js and their respective file and patientDet.ejs*/
 const app = express();
 const port = process.env.port;
 const saltRounds = 5;
-
+const PORT = process.env.PORT || 3000;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public/'));
 app.use(session({
