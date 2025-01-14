@@ -19,7 +19,7 @@ import { initializeClient, sendMessage, qrCodeUrl } from './components/whatsapp.
 import { createLog, loadLog } from './components/databaseMechanism.js';
 import { searchPat } from './components/search.js';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
-
+import { Client } from 'pg';
 
 dotenv.config();
 if (!process.env.UNAME) {
