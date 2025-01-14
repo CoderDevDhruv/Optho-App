@@ -19,7 +19,7 @@ import { initializeClient, sendMessage, qrCodeUrl } from './components/whatsapp.
 import { createLog, loadLog } from './components/databaseMechanism.js';
 import { searchPat } from './components/search.js';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
-import { Client } from 'pg';
+
 
 dotenv.config();
 if (!process.env.UNAME) {
@@ -56,14 +56,20 @@ app.use(express.json());
 app.use(bodyParser.json());
 
 
+import { Client } from 'pg'; 
+
 const db = new Client({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.DATABASE_URL, 
   ssl: {
-    rejectUnauthorized: false, // For secure connections in cloud environments like Render or Heroku
+    rejectUnauthorized: false, 
   },
-})
+});
 
 db.connect()
+  .then(() => console.log('Connected to the database'))
+  .catch(err => console.error('Database connection error:', err));
+
+
 initializeClient();
 
 let name;
