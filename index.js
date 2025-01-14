@@ -58,14 +58,27 @@ app.use(bodyParser.json());
 
 const { Pool } = pg;
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false, // Required for Render SSL connections
-  },
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
+// Test database connection
+pool.connect((err, client, release) => {
+    if (err) {
+        console.error('Error connecting to the database:', err.stack);
+    } else {
+        console.log('Successfully connected to the database');
+        release();
+    }
+});
 
-initializeClient();
+// Handle pool errors
+pool.on('error', (err) => {
+    console.error('Unexpected error on idle client', err);
+    process.exit(-1);
+});
 
 let name;
 
