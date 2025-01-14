@@ -1,16 +1,18 @@
 import pg from 'pg';
 import dotenv from 'dotenv';
-import { Client } from 'pg';
-dotenv.config();
 
+dotenv.config();
 const db = new Client({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.DATABASE_URL, 
   ssl: {
-    rejectUnauthorized: false, // For secure connections in cloud environments like Render or Heroku
+    rejectUnauthorized: false, 
   },
-})
+});
 
 db.connect()
+  .then(() => console.log('Connected to the database'))
+  .catch(err => console.error('Database connection error:', err));
+
 
 // Create a log entry in the database
 export async function createLog(
