@@ -55,18 +55,14 @@ app.use(express.static(path.join(__dirname, 'uploads'))); // Serve uploaded file
 app.use(express.json());
 app.use(bodyParser.json());
 
-const { Client } = require('pg');
 
-const db = new Client({
-  connectionString: process.env.DATABASE_URL, 
+const { Pool } = pg;
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false, 
+    rejectUnauthorized: false, // Required for Render SSL connections
   },
 });
-
-db.connect()
-  .then(() => console.log('Connected to the database'))
-  .catch(err => console.error('Database connection error:', err));
 
 
 initializeClient();
@@ -75,7 +71,7 @@ let name;
 
 function pats() {
     try {
-        return db.query("select * from details");
+        return pool.query("select * from details");
     } catch (e) {
         console.log(e);
     }
@@ -129,7 +125,7 @@ app.get('/export-to-excel/:id', async (req, res) => {
     const reg = req.params.id;
     try {
         // Fetch data from PostgreSQL
-        const result = await db.query('SELECT * FROM patientlog where reg = $1', [reg]);
+        const result = await pool.query('SELECT * FROM patientlog where reg = $1', [reg]);
 
         // Create a new workbook and a worksheet
         const workbook = new ExcelJS.Workbook();
@@ -200,7 +196,7 @@ app.post("/addPat", async (req, res) => {
     const advice = Array.isArray(det.advice) ? det.advice : [det.advice];
 
     try {
-        await db.query("INSERT INTO details(name, reg, age, sex, contact, beneficiary, dtype, ddur, insulin, oha, HBA1c, treatment, bcvar, bcval, iopr, iopl, drr, drl, mer, mel, octr, octl, advice, fllwp) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,$12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22,$23, $24)", [det.name, det.reg, det.age, det.sex, det.contact, det.beneficiary, det.dtype, det.ddur, det.insulin, det.oha, det.HBA1c, treatment, det.bcvar, det.bcval, det.iopr, det.iopl, det.drr, det.drl, det.mer, det.mel, det.octr, det.octl, advice, det.fllwp]);
+        await pool.query("INSERT INTO details(name, reg, age, sex, contact, beneficiary, dtype, ddur, insulin, oha, HBA1c, treatment, bcvar, bcval, iopr, iopl, drr, drl, mer, mel, octr, octl, advice, fllwp) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,$12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22,$23, $24)", [det.name, det.reg, det.age, det.sex, det.contact, det.beneficiary, det.dtype, det.ddur, det.insulin, det.oha, det.HBA1c, treatment, det.bcvar, det.bcval, det.iopr, det.iopl, det.drr, det.drl, det.mer, det.mel, det.octr, det.octl, advice, det.fllwp]);
 
         try {
             await createLog(det.reg, det.dtype, det.ddur, det.insulin, det.oha, det.HBA1c, treatment, det.bcvar, det.bcval, det.iopr, det.iopl, det.drr, det.drl, det.mer, det.mel, det.octr, det.octl, advice, det.fllwp);
@@ -219,10 +215,10 @@ app.get("/deletePat/:id",async (req, res) => {
     const delReg = (req.params.id);
 
     try {
-        await db.query('delete from patientLog where reg = ($1)', [delReg]);
+        await pool.query('delete from patientLog where reg = ($1)', [delReg]);
         console.log("Patient with Registeration No:" + delReg + " deleted successfully from patientLog");
         try {
-            await db.query('delete from details where reg = ($1)', [delReg]);
+            await pool.query('delete from details where reg = ($1)', [delReg]);
             console.log("Patient with Registeration No:" + delReg + " deleted successfully from details"); 
         } catch (e) {
             console.log(e);
@@ -259,7 +255,7 @@ app.post("/register", async (req, res) => {
 
 
     try {
-        const checkres = await db.query("select * from users where email = $1", [email]);
+        const checkres = await pool.query("select * from users where email = $1", [email]);
 
         if (checkres.rows.length > 0) {
             res.send("exists");
@@ -269,7 +265,7 @@ app.post("/register", async (req, res) => {
                 if (err) {
                     console.log(err)
                 } else {
-                    const result = await db.query("insert into users (email, password) values ($1,$2) returning *", [email, hash]);
+                    const result = await pool.query("insert into users (email, password) values ($1,$2) returning *", [email, hash]);
 
                     const user = result.rows[0];
                     req.login(user, (err) => {
@@ -468,7 +464,7 @@ app.post("/login", passport.authenticate("local", {
 
 passport.use("local", new Strategy(async function verify(username, password, cb) {
     try {
-        const result = await db.query("select * from users where email = $1", [username]);
+        const result = await pool.query("select * from users where email = $1", [username]);
 
         if (result.rows.length > 0) {
             const user = result.rows[0];
@@ -505,9 +501,9 @@ passport.use("google",
     }, async (accessToken, refreshToken, profile, cb) => {
         console.log(profile);
         try {
-            const result = await db.query("select * from users where email = $1", [profile.email])
+            const result = await pool.query("select * from users where email = $1", [profile.email])
             if (result.rows.length === 0) {
-                const newUser = await db.query("insert into users (email, password) values ($1,$2)", [profile.email, "google"])
+                const newUser = await pool.query("insert into users (email, password) values ($1,$2)", [profile.email, "google"])
                 cb(null, newUser.rows[0]);
             } else {
                 //exists
