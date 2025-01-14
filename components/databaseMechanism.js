@@ -1,6 +1,6 @@
 import pg from 'pg';
 import dotenv from 'dotenv';
-
+const { Client } = require('pg');
 dotenv.config();
 const db = new Client({
   connectionString: process.env.DATABASE_URL, 
