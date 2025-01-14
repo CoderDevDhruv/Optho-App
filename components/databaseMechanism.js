@@ -1,17 +1,14 @@
 import pg from 'pg';
 import dotenv from 'dotenv';
-const { Client } = require('pg');
+;
 dotenv.config();
-const db = new Client({
-  connectionString: process.env.DATABASE_URL, 
+const { Pool } = pg;
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false, 
+    rejectUnauthorized: false, // Required for Render SSL connections
   },
 });
-
-db.connect()
-  .then(() => console.log('Connected to the database'))
-  .catch(err => console.error('Database connection error:', err));
 
 
 // Create a log entry in the database
