@@ -55,13 +55,15 @@ app.use(express.static(path.join(__dirname, 'uploads'))); // Serve uploaded file
 app.use(express.json());
 app.use(bodyParser.json());
 
-const { Pool } = pg;
-const pool = new Pool({
+
+const db = new Client({
   connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false, // Required for Render SSL connections
+    rejectUnauthorized: false, // For secure connections in cloud environments like Render or Heroku
   },
-});
+})
+
+db.connect()
 initializeClient();
 
 let name;
