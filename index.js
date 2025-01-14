@@ -55,8 +55,7 @@ app.use(express.static(path.join(__dirname, 'uploads'))); // Serve uploaded file
 app.use(express.json());
 app.use(bodyParser.json());
 
-
-import { Client } from 'pg'; 
+const { Client } = require('pg');
 
 const db = new Client({
   connectionString: process.env.DATABASE_URL, 
