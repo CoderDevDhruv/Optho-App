@@ -35,7 +35,7 @@ google auth
 in index.js and their respective file and patientDet.ejs*/
 
 const app = express();
-const port = process.env.port;
+
 const saltRounds = 5;
 const port = process.env.PORT || 3000;
 app.use(bodyParser.urlencoded({ extended: true }));
