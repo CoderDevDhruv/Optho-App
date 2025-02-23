@@ -1,5 +1,15 @@
 import pg from 'pg';
 
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const db = new pg.Pool({
+    connectionString: process.env.DB_URL,  // Use process.env.DB_URL directly
+    ssl: { rejectUnauthorized: false }
+});
+
+db.connect();
 // const db = new pg.Client({
 //     user: "postgres",
 //     host: "localhost",
@@ -7,10 +17,7 @@ import pg from 'pg';
 //     password: "root123",
 //     port: 5432
 // });
-const db = new pg.Pool({
-    connectionString: connectionString,
-    ssl:{rejectUnauthorized: false}
-  });
+
 
 db.connect();
 
