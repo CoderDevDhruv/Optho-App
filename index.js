@@ -71,7 +71,9 @@ app.use(bodyParser.json());
 
 const db = new pg.Pool({
     connectionString: process.env.DB_URL    //connectionString,
-    ssl:{rejectUnauthorized: false}
+     ssl: {
+        rejectUnauthorized: false
+    }
   });
 
 db.connect();
