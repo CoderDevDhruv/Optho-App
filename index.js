@@ -70,11 +70,9 @@ app.use(bodyParser.json());
 // const connectionString = process.env.DB_URL || 'postgres://postgres:root123@localhost:5432/optho'
 
 const db = new pg.Pool({
-    connectionString: process.env.DB_URL    //connectionString,
-     ssl: {
-        rejectUnauthorized: false
-    }
-  });
+    connectionString: process.env.DB_URL,
+    ssl: { rejectUnauthorized: false }
+});
 
 db.connect();
 initializeClient();
