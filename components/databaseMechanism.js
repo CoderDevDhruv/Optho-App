@@ -1,12 +1,16 @@
 import pg from 'pg';
 
-const db = new pg.Client({
-    user: "postgres",
-    host: "localhost",
-    database: "optho",
-    password: "root123",
-    port: 5432
-});
+// const db = new pg.Client({
+//     user: "postgres",
+//     host: "localhost",
+//     database: "optho",
+//     password: "root123",
+//     port: 5432
+// });
+const db = new pg.Pool({
+    connectionString: connectionString,
+    ssl:{rejectUnauthorized: false}
+  });
 
 db.connect();
 
