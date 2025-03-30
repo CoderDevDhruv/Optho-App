@@ -67,7 +67,7 @@ app.use(bodyParser.json());
 //     port: 5432
 // });
 
-const connectionString = process.env.DB_URL || 'postgres://postgres:123456@localhost:5432/optho';
+const connectionString = process.env.DB_URL || 'postgres://postgres:root123@localhost:5432/optho';
 
 const db = new pg.Pool({
     connectionString: connectionString,

@@ -1,13 +1,20 @@
 import pg from 'pg';
 
-const db = new pg.Client({
-    user: "postgres",
-    host: "localhost",
-    database: "optho",
-    password: "123456",
-    port: 5432
-});
+// const db = new pg.Client({
+//     user: "postgres",
+//     host: "localhost",
+//     database: "optho",
+//     password: "root123",
+//     port: 5432
+// });
 
+
+const connectionString = process.env.DB_URL || 'postgres://postgres:root123@localhost:5432/optho';
+
+const db = new pg.Pool({
+    connectionString: connectionString,
+    // ssl:{rejectUnauthorized: false}
+});
 db.connect();
 
 export function createLog(visit, reg, dtype, ddur, insulin, oha, HBA1c, treatment, bcvar, bcval, iopr, iopl, ddr, drl ,mer, mel, octr, octl, advice, fllwp){
