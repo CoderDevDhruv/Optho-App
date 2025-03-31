@@ -13,7 +13,7 @@ const connectionString = process.env.DB_URL || 'postgres://postgres:root123@loca
 
 const db = new pg.Pool({
     connectionString: connectionString,
-    // ssl:{rejectUnauthorized: false}
+    ssl:{rejectUnauthorized: false}
 });
 db.connect();
 

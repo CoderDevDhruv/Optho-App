@@ -38,7 +38,7 @@ google auth
 in index.js and their respective file and patientDet.ejs*/
 
 const app = express();
-const port = 3000;
+const port = process.env.DB_PORT || 3000;
 const saltRounds = 5;
 const cl = console.log;
 
@@ -71,7 +71,7 @@ const connectionString = process.env.DB_URL || 'postgres://postgres:root123@loca
 
 const db = new pg.Pool({
     connectionString: connectionString,
-    // ssl:{rejectUnauthorized: false}
+    ssl:{rejectUnauthorized: false}
 });
 
 db.connect();
