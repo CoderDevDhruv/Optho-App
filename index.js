@@ -38,7 +38,7 @@ google auth
 in index.js and their respective file and patientDet.ejs*/
 
 const app = express();
-const port =  process.env.PORT || 3000;
+const port = 3000;
 const saltRounds = 5;
 const cl = console.log;
 
@@ -71,7 +71,7 @@ const connectionString = process.env.DB_URL || 'postgres://postgres:root123@loca
 
 const db = new pg.Pool({
     connectionString: connectionString,
-    ssl:{rejectUnauthorized: false}
+    // ssl:{rejectUnauthorized: false}
 });
 
 db.connect();
@@ -549,6 +549,14 @@ app.get("/deletePat/:id", async (req, res) => {
     res.redirect("/home");
 });
 
+app.get("/deleteLog/:reg/:id", async (req,res) => {
+    cl(req.params);
+
+    await db.query("delete from patientlog where reg = ($1) AND visit = ($2)",[req.params.reg, req.params.id]);
+
+    res.redirect("/home");
+})
+
 app.post("/updatePat/:reg", async (req, res) => {
     const det = req.body;
 
@@ -904,7 +912,7 @@ app.post('/generate-pdf', async (req, res) => {
         const pdfBytes = await pdfDoc.save();
 
         // Save the PDF to a file
-        const pdfPath = path.join(__dirname, 'DM-Screening-Form.pdf');
+        const pdfPath = path.join(__dirname + "/tmpPDF/", 'DM-Screening-Form.pdf');
         await fs.writeFile(pdfPath, pdfBytes);
 
         // Send the PDF via WhatsApp
@@ -989,5 +997,4 @@ passport.deserializeUser((user, cb) => {
 app.listen(port, () => {
     console.log(`Server deployed on http://localhost:${port}/home`);
 })
-
 
