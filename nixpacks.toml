@@ -13,7 +13,7 @@ nixPkgs = [
   "libxext",
   "libxfixes",
   "libxrender",
-  "libasound2"
+  "alsa-lib"  # 🔥 Replaces libasound2
 ]
 
 [phases.build]
