@@ -1,20 +1,24 @@
 [phases.setup]
 nixPkgs = [
-  "nodejs_18",
-  "chromium",
-  "fontconfig",
-  "glibc",
-  "nss",
-  "freetype",
-  "xorg.libX11",
-  "xorg.libXcomposite",
-  "xorg.libXdamage",
-  "xorg.libXext",
-  "xorg.libXfixes",
-  "xorg.libXrandr",
-  "xorg.libXrender",
-  "xorg.libXshmfence",
-  "alsa-lib"
+             "libappindicator3-1",
+            "fonts-liberation",
+            "libasound2",
+            "libatk-bridge2.0-0",
+            "libatk1.0-0",
+            "libgbm1",
+            "libgtk-3-0",
+            "libnspr4",
+            "libnss3",
+            "libx11-xcb1",
+            "libxcomposite1",
+            "libxcursor1",
+            "libxdamage1",
+            "libxfixes3",
+            "libxi6",
+            "libxrandr2",
+            “libxss1”,
+            “libxtst6”,
+            “xdg-utils”
 ]
 
 [phases.build]
