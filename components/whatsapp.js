@@ -29,9 +29,7 @@ const client = new Client({
             '--disable-setuid-sandbox',
             '--disable-dev-shm-usage'
         ],
-        executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome',  // Use the default path for Chrome on Render
-        
-        headless: true,
+        executablePath: process.env.CHROMIUM_PATH || /usr/bin/google-chrome-stable,  // Use the default path for Chrome on Render
     },
     takeoverOnConflict: true,  // Take over existing session
 });
