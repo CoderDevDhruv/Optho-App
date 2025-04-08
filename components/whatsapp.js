@@ -7,66 +7,61 @@ import { execSync } from 'child_process';
 const { Client, LocalAuth, MessageMedia } = pkg;
 
 // ======================
-// Your Working Chromium Path Resolution
+// Chromium Path Resolution
 // ======================
-async function getChromiumPath() {
+async function getExactChromiumPath() {
   try {
-    // Method 1: Try Nix store path first
-    const path = execSync('find /nix/store -name chromium -type f -executable | head -n 1').toString().trim();
-    if (path) {
-      await fs.access(path);
-      console.log('Using Chromium at:', path);
-      return path;
-    }
-  } catch (error) {
-    console.log('Nix store chromium not found, trying alternatives...');
-  }
-
-  // Fallback paths
-  const fallbackPaths = [
-    process.env.PUPPETEER_EXECUTABLE_PATH,
-    '/usr/bin/chromium',
-    '/usr/bin/chromium-browser',
-    '/usr/bin/google-chrome'
-  ];
-
-  for (const path of fallbackPaths) {
-    if (!path) continue;
+    // Method 1: Query Nix store directly
     try {
-      await fs.access(path);
-      console.log('Using Chromium at:', path);
-      return path;
-    } catch (e) {
-      continue;
-    }
-  }
+      const nixPath = execSync(
+        'nix-store --query --references $(which chromium) | grep chromium | head -1',
+        { stdio: ['pipe', 'pipe', 'ignore'] }
+      ).toString().trim() + '/bin/chromium';
+      
+      await fs.access(nixPath);
+      return nixPath;
+    } catch {}
 
-  throw new Error('Chromium not found in any standard location');
+    // Method 2: Find in standard Nix locations
+    try {
+      const findPath = execSync(
+        'find /nix/store -path "*-chromium-*/bin/chromium" -type f -executable 2>/dev/null | head -1',
+        { stdio: ['pipe', 'pipe', 'ignore'] }
+      ).toString().trim();
+      
+      if (findPath) {
+        await fs.access(findPath);
+        return findPath;
+      }
+    } catch {}
+
+    // Fallback to environment variable or default
+    return process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium';
+  } catch (error) {
+    console.error('Chromium detection error:', error);
+    return '/usr/bin/chromium';
+  }
 }
 
+const chromiumPath = await getExactChromiumPath();
+console.log('Using Chromium at:', chromiumPath);
+
 // ======================
-// Client Configuration
+// Global Configurations
 // ======================
 export const qrCodeEmitter = new EventEmitter();
 export let qrCodeUrl = '';
 let isClientReady = false;
 let retryCount = 0;
-const MAX_RETRIES = 5;
+const MAX_RETRIES = 3;
 
-// Initialize Chromium path first
-let chromiumPath;
-try {
-  chromiumPath = await getChromiumPath();
-} catch (error) {
-  console.error('Chromium detection failed:', error.message);
-  chromiumPath = '/usr/bin/chromium'; // Final fallback
-  console.log('Using default Chromium path:', chromiumPath);
-}
-
+// ======================
+// WhatsApp Client Setup
+// ======================
 const client = new Client({
   authStrategy: new LocalAuth({
     dataPath: './sessions',
-    clientId: "main-client"
+    clientId: "client-1"  // Added for multi-session support
   }),
   puppeteer: {
     executablePath: chromiumPath,
@@ -80,41 +75,35 @@ const client = new Client({
       '--no-zygote',
       '--single-process',
       '--disable-gpu'
-    ],
-    timeout: 30000 // Increased timeout
+    ]
   },
   takeoverOnConflict: true,
   restartOnAuthFail: true
 });
 
 // ======================
-// Enhanced Event Handlers
+// Event Handlers
 // ======================
 client.on('qr', async (qr) => {
   qrcode.generate(qr, { small: true });
-  console.log('📲 QR Code generated, please scan');
-  
-  try {
-    qrCodeUrl = await QRCode.toDataURL(qr);
-    qrCodeEmitter.emit('qrCodeGenerated', qrCodeUrl);
-  } catch (e) {
-    console.error('QR Code URL generation failed:', e);
-  }
+  console.log('📲 Scan the QR code above to log in.');
+
+  qrCodeUrl = await QRCode.toDataURL(qr);
+  qrCodeEmitter.emit('qrCodeGenerated', qrCodeUrl);
 });
 
-client.on('authenticated', () => {
-  console.log('🔑 Authenticated successfully');
+client.on('authenticated', async (session) => {
+  console.log('🔑 Authentication successful!');
   qrCodeUrl = '';
+  // Backup session
+  await fs.writeFile('/tmp/session-backup.json', JSON.stringify(session));
 });
 
 client.on('ready', () => {
   isClientReady = true;
   retryCount = 0;
-  console.log('🚀 Client is READY');
-  console.log('System status:', {
-    chromiumPath,
-    memory: process.memoryUsage().rss / (1024 * 1024) + 'MB'
-  });
+  console.log('🚀 Client is ready!');
+  console.log('Memory usage:', process.memoryUsage());
 });
 
 client.on('auth_failure', (msg) => {
@@ -122,78 +111,95 @@ client.on('auth_failure', (msg) => {
 });
 
 client.on('disconnected', async (reason) => {
-  console.log('⚠️ Disconnected:', reason);
-  isClientReady = false;
-  if (retryCount < MAX_RETRIES) {
-    console.log('Attempting to reconnect...');
-    await initializeClient();
+  console.log('Disconnected:', reason);
+  if (reason === 'NAVIGATION_ERROR') {
+    await client.destroy();
+    process.exit(1);
   }
 });
 
-// ======================
-// Core Initialization
-// ======================
-export async function initializeClient() {
-  if (retryCount >= MAX_RETRIES) {
-    console.error('🚨 Maximum retry attempts reached');
-    return;
-  }
+client.on('puppeteer_error', (error) => {
+  console.error('🛠️ Puppeteer error:', error);
+  client.destroy().then(() => client.initialize());
+});
 
+// ======================
+// Core Functions
+// ======================
+export const initializeClient = async () => {
   try {
-    console.log(`Initializing client (attempt ${retryCount + 1}/${MAX_RETRIES})`);
-    
-    // Verify Chromium exists
+    // Verify chromium exists
     try {
       await fs.access(chromiumPath);
     } catch (err) {
-      console.error('Chromium access failed:', err.message);
-      throw err;
+      console.error('Chromium not found at:', chromiumPath);
+      throw new Error('Chromium executable not found');
     }
 
     await client.initialize();
   } catch (error) {
-    console.error('Initialization failed:', error.message);
-    retryCount++;
-    
+    console.error('❌ Initialization error:', error);
     if (retryCount < MAX_RETRIES) {
-      const delay = Math.min(5000 * retryCount, 30000);
-      console.log(`Retrying in ${delay/1000} seconds...`);
-      setTimeout(initializeClient, delay);
+      retryCount++;
+      console.log(`Retrying in 5 seconds (attempt ${retryCount}/${MAX_RETRIES})`);
+      setTimeout(initializeClient, 5000);
     } else {
-      console.error('Maximum initialization attempts reached');
+      console.error('Max retries reached. Exiting...');
+      process.exit(1);
     }
   }
-}
+};
 
-// ======================
-// Message Sending (Unchanged)
-// ======================
-export const sendMessage = async (phoneNumber, message = "Your Report", fileInput = null, fileName = null) => {
-  if (!isClientReady) {
-    throw new Error("Client not ready. Current status: " + client.info);
-  }
-
-  const chatId = `${phoneNumber}@c.us`;
-  
+export const sendMessage = async (
+  phoneNumber, 
+  message = "Your Report", 
+  fileInput = null,
+  fileName = "file.pdf"
+) => {
   try {
+    if (!isClientReady) {
+      throw new Error("WhatsApp client is not ready yet!");
+    }
+
+    const chatId = `${phoneNumber}@c.us`;
+    
     if (fileInput) {
-      const media = Buffer.isBuffer(fileInput)
-        ? new MessageMedia('application/pdf', fileInput.toString('base64'), fileName || 'file.pdf')
-        : new MessageMedia(
-            `application/${fileInput.split('.').pop() || 'pdf'}`,
-            (await fs.readFile(fileInput)).toString('base64'),
-            fileInput.split('/').pop() || fileName || 'file.pdf'
-          );
+      let media;
       
+      if (Buffer.isBuffer(fileInput)) {
+        media = new MessageMedia(
+          'application/pdf',
+          fileInput.toString('base64'),
+          fileName
+        );
+      } 
+      else if (typeof fileInput === 'string') {
+        const fileBuffer = await fs.readFile(fileInput);
+        const fileExtension = fileInput.split('.').pop() || 'pdf';
+        media = new MessageMedia(
+          `application/${fileExtension}`,
+          fileBuffer.toString('base64'),
+          fileInput.split('/').pop() || fileName
+        );
+      } else {
+        throw new Error("Invalid file input: must be Buffer or file path");
+      }
+
       await client.sendMessage(chatId, media, { caption: message });
-      console.log(`📁 Sent file to ${phoneNumber}`);
+      console.log(`📁 File sent to ${phoneNumber}`);
     } else {
       await client.sendMessage(chatId, message);
-      console.log(`✉️ Sent message to ${phoneNumber}`);
+      console.log(`✉️ Message sent to ${phoneNumber}`);
     }
-    return true;
   } catch (error) {
-    console.error(`Send failed to ${phoneNumber}:`, error.message);
+    console.error(`❌ Error sending to ${phoneNumber}:`, error.message);
+    
+    if (error.message.includes('Evaluation failed')) {
+      console.log('🔄 Restarting client due to evaluation error...');
+      await client.destroy();
+      await initializeClient();
+    }
+    
     throw error;
   }
 };
@@ -202,19 +208,17 @@ export const sendMessage = async (phoneNumber, message = "Your Report", fileInpu
 // Process Management
 // ======================
 process.on('SIGINT', async () => {
-  console.log('\n🛑 Graceful shutdown initiated');
-  try {
-    await client.destroy();
-    console.log('Client destroyed successfully');
-    process.exit(0);
-  } catch (e) {
-    console.error('Shutdown error:', e);
-    process.exit(1);
-  }
+  console.log('🛑 Shutting down gracefully...');
+  await client.destroy();
+  process.exit(0);
 });
 
-// Start initialization
-initializeClient().catch(e => console.error('Initial startup failed:', e));
+process.on('unhandledRejection', (error) => {
+  console.error('⚠️ Unhandled rejection:', error);
+});
+
+// Initialize the client when this module is loaded
+initializeClient().catch(console.error);
 
 // ======================
 // Module Exports
@@ -223,10 +227,5 @@ export default {
   initializeClient,
   sendMessage,
   qrCodeEmitter,
-  getClientStatus: () => ({
-    isReady: isClientReady,
-    retryCount,
-    maxRetries: MAX_RETRIES,
-    chromiumPath
-  })
+  getClientStatus: () => ({ isReady: isClientReady, retryCount }),
 };
