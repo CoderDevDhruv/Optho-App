@@ -1,35 +1,27 @@
-[phases.setup]
+[build]
 nixPkgs = [
-  "nodejs_18",
   "chromium",
-  "fontconfig",
-  "glibc",
+  "libnotify",
+  "libappindicator-gtk3",
   "nss",
-  "freetype",
-  "atk",
+  "libxss",
+  "fontconfig",
+  "pango",
   "gtk3",
-  "nspr",
+  "cups",
+  "expat",
+  "dbus",
   "xorg.libX11",
-  "xorg.libXScrnSaver",
+  "xorg.libxcb",
   "xorg.libXcomposite",
   "xorg.libXcursor",
   "xorg.libXdamage",
+  "xorg.libXext",
   "xorg.libXfixes",
   "xorg.libXi",
   "xorg.libXrandr",
+  "xorg.libXrender",
   "xorg.libXtst",
-  "libappindicator-gtk3",
-  "xdg-utils",
-  "alsa-lib"
-]
-
-[phases.build]
-cmds = [
-  "echo '✅ Chromium & Node.js installed'"
-]
-
-[phases.start]
-cmds = [
-  "export PUPPETEER_EXECUTABLE_PATH=$(which chromium)",
-  "node index.js"
+  "xorg.libXScrnSaver",
+  "at-spi2-core"
 ]
