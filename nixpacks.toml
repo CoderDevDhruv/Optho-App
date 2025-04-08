@@ -18,7 +18,13 @@ nixPkgs = [
 ]
 
 [phases.build]
-cmds = ["echo '✅ Chromium & Node.js installed'"]
+cmds = [
+  "echo '✅ Chromium & Node.js installed'",
+  "export CHROMIUM_PATH=$(which chromium)"
+]
 
 [phases.start]
-cmds = ["node index.js"]
+cmds = [
+  "export PUPPETEER_EXECUTABLE_PATH=$(which chromium)",
+  "node index.js"
+]
