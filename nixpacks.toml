@@ -10,17 +10,17 @@ nixPkgs = [
   "gtk3",
   "nspr",
   "libX11",
+  "libXScrnSaver",
   "libXcomposite",
   "libXcursor",
   "libXdamage",
   "libXfixes",
   "libXi",
   "libXrandr",
-  "libXScrnSaver",
   "libXtst",
+  "libappindicator-gtk3",
   "xdg-utils",
-  "alsa-lib",
-  "libappindicator-gtk3"
+  "alsa-lib"
 ]
 
 [phases.build]
