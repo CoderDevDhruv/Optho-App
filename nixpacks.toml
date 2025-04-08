@@ -1,30 +1,31 @@
 [phases.setup]
 nixPkgs = [
-             "libappindicator3-1",
-            "fonts-liberation",
-            "libasound2",
-            "libatk-bridge2.0-0",
-            "libatk1.0-0",
-            "libgbm1",
-            "libgtk-3-0",
-            "libnspr4",
-            "libnss3",
-            "libx11-xcb1",
-            "libxcomposite1",
-            "libxcursor1",
-            "libxdamage1",
-            "libxfixes3",
-            "libxi6",
-            "libxrandr2",
-            “libxss1”,
-            “libxtst6”,
-            “xdg-utils”
+  "nodejs_18",
+  "chromium",
+  "fontconfig",
+  "glibc",
+  "nss",
+  "freetype",
+  "atk",
+  "gtk3",
+  "nspr",
+  "libX11",
+  "libXcomposite",
+  "libXcursor",
+  "libXdamage",
+  "libXfixes",
+  "libXi",
+  "libXrandr",
+  "libXScrnSaver",
+  "libXtst",
+  "xdg-utils",
+  "alsa-lib",
+  "libappindicator-gtk3"
 ]
 
 [phases.build]
 cmds = [
-  "echo '✅ Chromium & Node.js installed'",
-  "export CHROMIUM_PATH=$(which chromium)"
+  "echo '✅ Chromium & Node.js installed'"
 ]
 
 [phases.start]
