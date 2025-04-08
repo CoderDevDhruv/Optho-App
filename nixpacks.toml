@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["nodejs", "chromium"]
+nixPkgs = ["nodejs", "chromium", "chromiumDriver"]
 
 [phases.build]
 cmds = ["echo 'Chromium & Node.js installed'"]
