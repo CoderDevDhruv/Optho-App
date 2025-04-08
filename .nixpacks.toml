@@ -1,0 +1,5 @@
+[[pkgs]]
+name = "google-chrome"
+
+[[pkgs]]
+name = "nss"
