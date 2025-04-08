@@ -1,8 +1,8 @@
 [phases.setup]
-nixPkgs = ["chromium"]
+nixPkgs = ["nodejs", "chromium"]
 
 [phases.build]
-cmds = ["echo 'Chromium installed'"]
+cmds = ["echo 'Chromium & Node.js installed'"]
 
 [phases.start]
 cmds = ["node index.js"]
