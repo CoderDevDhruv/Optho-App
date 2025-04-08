@@ -6,14 +6,15 @@ nixPkgs = [
   "glibc",
   "nss",
   "freetype",
-  "libxshmfence",
-  "libxrandr",
-  "libxcomposite",
-  "libxdamage",
-  "libxext",
-  "libxfixes",
-  "libxrender",
-  "alsa-lib"  # 🔥 Replaces libasound2
+  "libX11",
+  "libXcomposite",
+  "libXdamage",
+  "libXext",
+  "libXfixes",
+  "libXrandr",
+  "libXrender",
+  "libXshmfence",
+  "alsa-lib"  # Fix for audio issues
 ]
 
 [phases.build]
