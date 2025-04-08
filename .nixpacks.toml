@@ -1,5 +1,5 @@
 [[pkgs]]
-name = "google-chrome"
+name = "chromium"
 
 [[pkgs]]
 name = "nss"
