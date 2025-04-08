@@ -15,6 +15,8 @@ let isClientReady = false;
 let retryCount = 0;
 const MAX_RETRIES = 3;
 
+
+const chromiumPath = process.env.CHROMIUM_PATH || '/usr/bin/chromium';
 // ======================
 // WhatsApp Client Setup
 // ======================
@@ -29,7 +31,7 @@ const client = new Client({
             '--disable-setuid-sandbox',
             '--disable-dev-shm-usage'
         ],
-        executablePath: process.env.CHROMIUM_PATH || '/usr/bin/google-chrome-stable',  // Use the default path for Chrome on Render
+        executablePath: chromiumPath,,  // Use the default path for Chrome on Render
     },
     takeoverOnConflict: true,  // Take over existing session
 });
