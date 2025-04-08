@@ -1,20 +1,20 @@
 [phases.setup]
 nixPkgs = [
-  "nodejs",
+  "nodejs_18",
   "chromium",
   "fontconfig",
   "glibc",
   "nss",
   "freetype",
-  "libX11",
-  "libXcomposite",
-  "libXdamage",
-  "libXext",
-  "libXfixes",
-  "libXrandr",
-  "libXrender",
-  "libXshmfence",
-  "alsa-lib"  # Fix for audio issues
+  "xorg.libX11",
+  "xorg.libXcomposite",
+  "xorg.libXdamage",
+  "xorg.libXext",
+  "xorg.libXfixes",
+  "xorg.libXrandr",
+  "xorg.libXrender",
+  "xorg.libXshmfence",
+  "alsa-lib"
 ]
 
 [phases.build]
