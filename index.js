@@ -222,9 +222,9 @@ app.get("/addPat", (req, res) => {
     res.render('addPat.ejs', { reg });
 });
 
-// app.get("/register", (req, res) => {
-//     res.render("register.ejs")
-// })
+app.get("/register", (req, res) => {
+    res.render("register.ejs")
+})
 
 app.get("/login", (req, res) => {
     res.render("login.ejs");
