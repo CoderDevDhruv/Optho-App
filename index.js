@@ -95,15 +95,15 @@ app.get('/', (req, res) => {
 })
 
 app.get('/home', async (req, res) => {
-    // if (req.isAuthenticated()) {
+    if (req.isAuthenticated()) {
     name = await pats();
     const currentUrl = req.get("host");
     cl(currentUrl);
     searchPat(name);
     res.render("index.ejs", { name: name.rows });
-    // } else {
-    //     res.redirect("/login");
-    // }
+    } else {
+        res.redirect("/login");
+    }
 
 })
 
@@ -222,9 +222,9 @@ app.get("/addPat", (req, res) => {
     res.render('addPat.ejs', { reg });
 });
 
-app.get("/register", (req, res) => {
-    res.render("register.ejs")
-})
+// app.get("/register", (req, res) => {
+//     res.render("register.ejs")
+// })
 
 app.get("/login", (req, res) => {
     res.render("login.ejs");
